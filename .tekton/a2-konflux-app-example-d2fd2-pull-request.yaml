@@ -19,7 +19,7 @@ metadata:
   namespace: rh-ee-rgalvao-tenant
 spec:
   timeouts:
-    pipeline: "10s"
+    pipeline: "3m"
   params:
   - name: git-url
     value: '{{source_url}}'
