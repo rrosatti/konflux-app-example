@@ -31,6 +31,10 @@ spec:
     value:
     - linux/x86_64
     - linux/arm64
+  - name: node-versions
+    value:
+    - "18"
+    - "20"
   - name: dockerfile
     value: Dockerfile
   pipelineSpec:
@@ -107,6 +111,11 @@ spec:
       description: List of platforms to build the container images on. The available
         set of values is determined by the configuration of the multi-platform-controller.
       name: build-platforms
+      type: array
+    - default:
+      - "18"
+      description: List of Node.js versions to build against.
+      name: node-versions
       type: array
     results:
     - description: ""
@@ -199,6 +208,8 @@ spec:
         - name: PLATFORM
           value:
           - $(params.build-platforms)
+        - name: NODE_VERSION
+          value: $(params.node-versions)
       name: build-images
       params:
       - name: IMAGE
