@@ -15,6 +15,7 @@ metadata:
     appstudio.openshift.io/application: testing-123
     appstudio.openshift.io/component: test-edit-pr-2
     pipelines.appstudio.openshift.io/type: build
+    dummy.io/test: "Dummy message"
   name: test-edit-pr-2-on-pull-request
   namespace: rh-ee-rgalvao-tenant
 spec:
