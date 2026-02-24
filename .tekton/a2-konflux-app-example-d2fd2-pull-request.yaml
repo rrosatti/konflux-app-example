@@ -17,6 +17,8 @@ metadata:
   name: a2-konflux-app-example-d2fd2-on-pull-request
   namespace: rh-ee-rgalvao-tenant
 spec:
+  timeouts:
+    pipeline: "3m"
   params:
   - name: git-url
     value: '{{source_url}}'
