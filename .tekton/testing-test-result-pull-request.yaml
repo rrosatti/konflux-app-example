@@ -153,7 +153,7 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
-    - name: simulate-success
+    - name: simulate-error
       runAfter:
         - init
       taskSpec:
@@ -161,7 +161,7 @@ spec:
           - name: TEST_OUTPUT
             description: Test output (JSON)
         steps:
-          - name: simulate-success-step
+          - name: simulate-error-step
             image: registry.access.redhat.com/ubi8/ubi-minimal
             script: |
               #!/bin/sh
@@ -169,16 +169,16 @@ spec:
               timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
               cat <<EOF > $(results.TEST_OUTPUT.path)
               {
-                "result": "SUCCESS",
+                "result": "ERROR",
                 "namespace": "example-namespace",
                 "timestamp": "$timestamp",
-                "successes": 1,
-                "failures": 0,
+                "successes": 0,
+                "failures": 1,
                 "warnings": 0,
-                "note": "Simulated SUCCESS for testing TEST_OUTPUT reporting"
+                "note": "Simulated ERROR for testing TEST_OUTPUT reporting"
               }
               EOF
-              exit 0
+              exit 1
     - name: prefetch-dependencies
       params:
       - name: input
