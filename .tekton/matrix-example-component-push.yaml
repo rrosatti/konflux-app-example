@@ -24,6 +24,14 @@ spec:
     value: '{{revision}}'
   - name: output-image
     value: quay.io/redhat-user-workloads-stage/rh-ee-rgalvao-tenant/matrix-example-component:{{revision}}
+  - name: build-platforms
+    value:
+    - linux/x86_64
+    - linux/arm64
+  - name: node-versions
+    value:
+    - "18"
+    - "20"
   - name: dockerfile
     value: Dockerfile
   pipelineSpec:
@@ -99,6 +107,16 @@ spec:
         VMs
       name: privileged-nested
       type: string
+    - default:
+      - linux/x86_64
+      description: List of platforms to build the container images on. The available set of values is determined by the configuration of the multi-platform-controller.
+      name: build-platforms
+      type: array
+    - default:
+      - "18"
+      description: List of Node.js versions to build against.
+      name: node-versions
+      type: array
     results:
     - description: ""
       name: IMAGE_URL
@@ -176,7 +194,15 @@ spec:
         workspace: git-auth
       - name: netrc
         workspace: netrc
-    - name: build-container
+    - matrix:
+        params:
+        - name: PLATFORM
+          value:
+          - $(params.build-platforms)
+        - name: NODE_VERSION
+          value: $(params.node-versions)
+      name: build-images
+      displayName: "Build for $(params.PLATFORM) and Node.js $(params.NODE_VERSION)"
       params:
       - name: IMAGE
         value: $(params.output-image)
@@ -199,26 +225,26 @@ spec:
         value: $(params.build-args-file)
       - name: PRIVILEGED_NESTED
         value: $(params.privileged-nested)
-      - name: SOURCE_URL
-        value: $(tasks.clone-repository.results.url)
+      - name: SOURCE_ARTIFACT
+        value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+      - name: CACHI2_ARTIFACT
+        value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+      - name: IMAGE_APPEND_PLATFORM
+        value: "true"
       - name: BUILDAH_FORMAT
         value: $(params.buildah-format)
       - name: HTTP_PROXY
         value: $(tasks.init.results.http-proxy)
       - name: NO_PROXY
         value: $(tasks.init.results.no-proxy)
-      - name: SOURCE_ARTIFACT
-        value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
-      - name: CACHI2_ARTIFACT
-        value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       runAfter:
       - prefetch-dependencies
       taskRef:
         params:
         - name: name
-          value: buildah-oci-ta
+          value: buildah-remote-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta:0.9@sha256:974103756090096206b60132a8cda16f788dcbef8f5b2cab4166e7726713e5d4
+          value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.9@sha256:4b3b76822c67fb734a9b3a5112e3810e271ee09d2777720a277a33870d3b038b
         - name: kind
           value: task
         resolver: bundles
@@ -230,11 +256,11 @@ spec:
         value: $(params.build-image-index)
       - name: IMAGES
         value:
-        - $(tasks.build-container.results.IMAGE_URL)@$(tasks.build-container.results.IMAGE_DIGEST)
+        - $(tasks.build-images.results.IMAGE_REF[*])
       - name: BUILDAH_FORMAT
         value: $(params.buildah-format)
       runAfter:
-      - build-container
+      - build-images
       taskRef:
         params:
         - name: name
