@@ -215,6 +215,7 @@ spec:
         - name: NODE_VERSION
           value: $(params.node-versions)
       name: build-images
+      displayName: "Build for $(params.PLATFORM) and Node.js $(params.NODE_VERSION)"
       params:
       - name: IMAGE
         value: $(params.output-image)
