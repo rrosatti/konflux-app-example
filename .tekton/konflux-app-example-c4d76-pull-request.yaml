@@ -181,10 +181,10 @@ spec:
           value: task
         resolver: bundles
       workspaces:
-      - name: git-basic-auth
-        workspace: git-auth
-      - name: netrc
-        workspace: netrc
+      - name: git-basic
+        workspace: git
+      - name: netrc2
+        workspace: netrc2
     - name: build-container
       params:
       - name: IMAGE
